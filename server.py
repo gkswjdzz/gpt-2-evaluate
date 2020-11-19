@@ -2,17 +2,19 @@ from flask import Flask, request, jsonify
 from transformers import AutoTokenizer, AutoModelForCausalLM
 import math
 import os
+import time
 
 
 MODEL_NAME=os.environ['MODEL_NAME']
 tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
 model = AutoModelForCausalLM.from_pretrained(MODEL_NAME, return_dict=True)
+model.to(device='cuda')
 
 app = Flask(__name__)
 
 
 def score(raw_text):
-    encoded_text = tokenizer(raw_text, return_tensors='pt')
+    encoded_text = tokenizer(raw_text, return_tensors='pt').to(device='cuda')
     output = model(**encoded_text, labels=encoded_text['input_ids'])
     return math.exp(output.loss)
 
