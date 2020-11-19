@@ -1,0 +1,39 @@
+openapi: 3.0.1
+
+info:
+  title: gpt-2-evaluate
+  description: ' '
+  version: "0.1"
+servers:
+#  - url: https://gpt2-large-gpt-2-evaluate-gkswjdzz.endpoint.ainize.ai
+  - url: http://localhost:8001
+paths:
+  /evaluate:
+    post:
+      tags:
+      - gpt-2-large
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                context:
+                  type: string
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  score:
+                    type: number
+        '400':
+          description: Bad Request
+        '500':
+          description: Server side error
+tags:
+- name: gpt-2-large
