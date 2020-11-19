@@ -5,8 +5,7 @@ info:
   description: ' '
   version: "0.1"
 servers:
-#  - url: https://gpt2-large-gpt-2-evaluate-gkswjdzz.endpoint.ainize.ai
-  - url: http://localhost:8001
+ - url: https://gpt2-large-gpt-2-evaluate-gkswjdzz.endpoint.ainize.ai
 paths:
   /evaluate:
     post:
