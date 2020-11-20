@@ -16,10 +16,12 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                context:
-                  type: string
+              type: array
+              items:
+                type: integer
+              example: [
+                8117, 318, 257, 220, 933, 12754, 3303, 286
+              ]
       responses:
         '200':
           description: success
@@ -30,6 +32,9 @@ paths:
                 properties:
                   score:
                     type: number
+                example: {
+                  "score": 23.681757785577105
+                }
         '400':
           description: Bad Request
         '500':
