@@ -4,6 +4,7 @@ import torch
 import math
 import os
 
+MILLION = 1000 * 1000
 
 MODEL_NAME = os.environ["MODEL_NAME"]
 model = AutoModelForCausalLM.from_pretrained(MODEL_NAME, return_dict=True)
@@ -25,8 +26,9 @@ def check(encoded_text):
 def score(encoded_text):
     if not check(encoded_text):
         return -1
-
-    encoded_text = torch.cuda.LongTensor(encoded_text)
+    if len(encoded_text) == 1:
+        return 100.0 * MILLION
+    encoded_text = torch.torch.LongTensor(encoded_text)
     output = model(input_ids=encoded_text, labels=encoded_text)
     print(output.loss, type(output.loss))
     print(output.loss.cpu().detach())
