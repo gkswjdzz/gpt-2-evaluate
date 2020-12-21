@@ -28,7 +28,7 @@ def score(encoded_text):
         return -1
     if len(encoded_text) == 1:
         return 100.0 * MILLION
-    encoded_text = torch.torch.LongTensor(encoded_text)
+    encoded_text = torch.cuda.LongTensor(encoded_text)
     output = model(input_ids=encoded_text, labels=encoded_text)
     print(output.loss, type(output.loss))
     print(output.loss.cpu().detach())
