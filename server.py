@@ -1,8 +1,11 @@
+import sentry_sdk
 from flask import Flask, request, jsonify
+from sentry_sdk.integrations.flask import FlaskIntegration
 from transformers import AutoModelForCausalLM
 import torch
 import math
 import os
+import requests
 
 MILLION = 1000 * 1000
 
@@ -24,7 +27,11 @@ app = Flask(__name__)
 
 def send_message_to_slack(text):
     url = os.environ.get('SLACK_INCOMING_WEBHOOKS_URL')
-    payload = { "text" : text }
+    payload = {
+        "pretext": "*GPT2-EVALUTE SERVER ERROR OCCURED!*",
+        "text" : f"*ERROR*: {text}",
+        "color": "danger",
+    }
     requests.post(url, json=payload)
 
     if env == "production":
@@ -63,9 +70,9 @@ def evaluate():
         return jsonify({"score": -1}), 400
     except Exception as e:
         if request.is_json:
-            send_message_to_slack(f'error occur on gpt-2-evaluate server! \n input vector: {request.get_json()}. \n {e}')
+            send_message_to_slack(f'requested json: *{request.get_json()}*. \n *{e}*')
         else:
-            send_message_to_slack(f'error occur on gpt-2-evaluate server! \n input vector: {request.data}. \n {e}')
+            send_message_to_slack(f'requested data: *{request.data}*. \n *{e}*')
         return jsonify({"score": -1}), 500
 
 
