@@ -6,11 +6,29 @@ import os
 
 MILLION = 1000 * 1000
 
+env = os.environ.get('PRODUCT_ENV')
+
+if env == "production":
+    sentry_sdk.init(
+        dsn=os.environ.get('SENTRY_DSN'),
+        integrations=[FlaskIntegration()],
+        traces_sample_rate=1.0
+    )
+
 MODEL_NAME = os.environ["MODEL_NAME"]
 model = AutoModelForCausalLM.from_pretrained(MODEL_NAME, return_dict=True)
 model.to(device="cuda")
 
 app = Flask(__name__)
+
+
+def send_message_to_slack(text):
+    url = os.environ.get('SLACK_INCOMING_WEBHOOKS_URL')
+    payload = { "text" : text }
+    requests.post(url, json=payload)
+
+    if env == "production":
+        sentry_sdk.capture_message(text, "fatal")
 
 
 def check(encoded_text):
@@ -37,11 +55,18 @@ def score(encoded_text):
 
 @app.route("/evaluate", methods=["POST"])
 def evaluate():
-    if request.is_json:
-        content = request.get_json()
-        print(content, type(content))
-        return jsonify({"score": score(content)}), 200
-    return jsonify({"score": -1}), 400
+    try:
+        if request.is_json:
+            content = request.get_json()
+            print(content, type(content))
+            return jsonify({"score": score(content)}), 200
+        return jsonify({"score": -1}), 400
+    except Exception as e:
+        if request.is_json:
+            send_message_to_slack(f'error occur on gpt-2-evaluate server! \n input vector: {request.get_json()}. \n {e}')
+        else:
+            send_message_to_slack(f'error occur on gpt-2-evaluate server! \n input vector: {request.data}. \n {e}')
+        return jsonify({"score": -1}), 500
 
 
 if __name__ == "__main__":
