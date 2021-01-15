@@ -60,6 +60,11 @@ def score(encoded_text):
     return math.exp(output.loss.cpu().detach())
 
 
+@app.route("/healthz", methods=["GET"])
+def healthCheck():
+    return "OK", 200
+
+
 @app.route("/evaluate", methods=["POST"])
 def evaluate():
     try:
